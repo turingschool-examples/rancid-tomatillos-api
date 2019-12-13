@@ -1,0 +1,14 @@
+{
+  "name": "rancid-tomatillos-be",
+  "version": "1.0.0",
+  "description": "Backend repo for Rancid Tomatillos project",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Turing School of Software and Design",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
