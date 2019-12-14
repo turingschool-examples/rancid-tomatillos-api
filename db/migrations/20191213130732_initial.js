@@ -13,8 +13,7 @@ exports.up = function(knex) {
       table.string('title');
       table.string('poster_path');
       table.string('release_date');
-      table.string('overview');
-      table.timestamps(true, true);
+      table.text('overview');
     }),    
 
     knex.schema.createTable('moviesReviews', function(table) {
