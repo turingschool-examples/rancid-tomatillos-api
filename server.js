@@ -18,7 +18,7 @@ app.get('/', (request, response) => {
 const verifyBodyProperties = (propertiesToCheck) => {
   return function(request, response, next) {
     for (let requiredParameter of propertiesToCheck) {
-      if (!request.body[requiredParameter]) return response.status(422).json({message: `You are missing a required parameter of ${requiredParameter}`});
+      if (!request.body[requiredParameter]) return response.status(422).json({error: `You are missing a required parameter of ${requiredParameter}`});
     }
     next();
   }
@@ -28,18 +28,22 @@ const verifyBodyProperties = (propertiesToCheck) => {
 app.post('/api/v1/login', verifyBodyProperties(['email', 'password']), (request, response) => {
   const { email, password } = request.body;
 
-  database('users').where({ email, password }).first()
-    .then(user => {
-      const { id, name, email } = user;
-      return response.status(201).json({ user: { id, name, email } });
+  database('users').where({ email, password })
+    .then(users => {
+      if (users.length) {
+        const { id, name, email } = users[0];
+        return response.status(201).json({ user: { id, name, email } });
+      } else {
+        return response.status(403).json({ error: 'Username or password is incorrect'});
+      }
     })
-    .catch(err => response.status(500).json({ err }));
+    .catch(error => response.status(500).json({ error }));
 });
 
 app.get('/api/v1/movies', (request, response) => {
   database('movies').select()
     .then(movies => response.status(200).json({ movies }))
-    .catch(err => response.status(500).json({ error: err }));
+    .catch(error => response.status(500).json({ error }));
 });
 
 app.listen(app.get('port'), () => {
