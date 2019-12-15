@@ -1,7 +1,9 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 
-app.set('port', process.env.PORT || 3000);
+app.set('port', process.env.PORT || 3001);
+app.use(cors());
 app.use(express.json());
 
 const environment = process.env.NODE_ENV || 'development';
@@ -12,8 +14,18 @@ app.get('/', (request, response) => {
   response.status(200).json({hello: 'Head on over to /api/v1/movies to start getting movies'});
 });
 
-app.post('/api/v1/users', (request, response) => {
-  // Check body contents
+// Body-checknig middleware
+const verifyBodyProperties = (propertiesToCheck) => {
+  return function(request, response, next) {
+    for (let requiredParameter of propertiesToCheck) {
+      if (!request.body[requiredParameter]) return response.status(422).json({message: `You are missing a required parameter of ${requiredParameter}`});
+    }
+    next();
+  }
+};
+
+// Users
+app.post('/api/v1/login', verifyBodyProperties(['email', 'password']), (request, response) => {
   const { email, password } = request.body;
 
   database('users').where({ email, password }).first()
