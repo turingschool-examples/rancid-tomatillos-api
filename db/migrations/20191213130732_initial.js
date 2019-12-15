@@ -16,7 +16,7 @@ exports.up = function(knex) {
       table.text('overview');
     }),    
 
-    knex.schema.createTable('moviesReviews', function(table) {
+    knex.schema.createTable('usersReviews', function(table) {
       table.increments('id').primary();
       table.integer('user_id').unsigned().references('users.id');
       table.integer('movie_id').unsigned().references('movies.id');
@@ -28,7 +28,7 @@ exports.up = function(knex) {
 
 exports.down = function(knex) {
   return Promise.all([
-    knex.schema.dropTable('moviesReviews'),
+    knex.schema.dropTable('usersReviews'),
     knex.schema.dropTable('movies'),
     knex.schema.dropTable('users')
   ]);
