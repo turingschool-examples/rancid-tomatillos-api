@@ -12,6 +12,7 @@ exports.up = function(knex) {
       table.increments('id').primary();
       table.string('title');
       table.string('poster_path');
+      table.string('backdrop_path');
       table.string('release_date');
       table.text('overview');
     }),    

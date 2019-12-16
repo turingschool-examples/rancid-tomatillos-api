@@ -3,7 +3,7 @@ exports.seed = (knex) => {
   return knex('users').del()
     .then(() => {
       return knex('users').insert([
-        {name: 'Alan', email: 'alan@turing.io', password: 'complete'},
+        {name: 'Alan', email: 'alan@turing.io', password: 'promisedotyall'},
         {name: 'Sam', email: 'sam@turing.io', password: '123456'},
         {name: 'Lucy', email: 'lucy@turing.io', password: 'password1'},
         {name: 'Greg', email: 'greg@turing.io', password: 'abc123'},
