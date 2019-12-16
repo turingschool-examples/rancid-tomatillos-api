@@ -2,6 +2,8 @@
 
 This is the back-end repo for the Rancid Tomatillos Front-End project. It is hosted on Heroku using the instructors account.
 
+Documentation for the endpoints is found in the project spec.
+
 ## Seed Data
 
 There is seed data in the `./db/seeds/dev` directory that is used for both dev and production environments. The movie data is gathered from the Movie DB API using this endpoint: https://developers.themoviedb.org/3/movies/get-now-playing
