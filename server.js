@@ -63,12 +63,44 @@ app.get('/api/v1/users/:user_id/ratings', (request, response) => {
       } else {
         // Send that user's ratings
         database('usersReviews').where({ user_id })
-          .then(ratings => {
-            return response.status(200).json({ ratings });
-          })
+          .then(ratings => response.status(200).json({ ratings }))
           .catch(error => response.status(500).json({ error }));
       }
     })
+    .catch(error => response.status(500).json({ error }));
+});
+
+// POST new rating for a user
+app.post('/api/v1/users/:user_id/ratings', (request, response) => {
+  const { user_id } = request.params;
+  const { movie_id, rating } = request.body; 
+
+  // Check that rating is integer between 1 and 10
+  if (!Number.isInteger(rating) || rating < 1 || rating > 10 ) {
+    return response.status(422).json({ error: 'Rating must be an integer between 1 and 10' });
+  }
+
+  // Check if user exists
+  database('users').where({ id: user_id })
+    .then(users => {
+      if (!users.length) {
+        return response.status(404).json({ error: `No user found with id:${user_id}`});
+      } else {
+        // Check is movie exists
+        database('movies').where({id: movie_id})
+          .then(movies => {
+            if (!movies.length) {
+              return response.status(422).json({ error: `No movie found with id:${movie_id}`});
+            } else {
+              // Add rating for user
+              database('usersReviews').insert({ user_id, movie_id, rating }, ['user_id', 'movie_id', 'rating'])
+                .then(rating => response.status(201).json({ rating: rating[0] }))
+                .catch(error => response.status(500).json({ error }));
+            }
+          })
+      }
+    })
+    .catch(error => response.status(500).json({ error }));
 });
 
 
