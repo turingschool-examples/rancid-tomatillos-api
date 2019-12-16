@@ -64,8 +64,7 @@ app.get('/api/v1/users/:user_id/ratings', (request, response) => {
         // Send that user's ratings
         database('usersReviews').where({ user_id })
           .then(ratings => {
-            console.log(ratings);
-            
+            return response.status(200).json({ ratings });
           })
           .catch(error => response.status(500).json({ error }));
       }
