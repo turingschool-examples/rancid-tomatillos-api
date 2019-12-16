@@ -14,7 +14,7 @@ app.get('/', (request, response) => {
   response.status(200).json({hello: 'Head on over to /api/v1/movies to start getting movies'});
 });
 
-// Body-checknig middleware
+// Body-checking middleware
 const verifyBodyProperties = (propertiesToCheck) => {
   return function(request, response, next) {
     for (let requiredParameter of propertiesToCheck) {
