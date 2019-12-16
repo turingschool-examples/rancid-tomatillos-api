@@ -1,4 +1,4 @@
-# Rancid Tomatillo API
+# Rancid Tomatillos API
 
 This is the back-end repo for the Rancid Tomatillos Front-End project. It is hosted on Heroku using the instructors account.
 
