@@ -1,7 +1,7 @@
 
-exports.seed = function(knex) {
+exports.seed = (knex) => {
   return knex('movies').del()
-    .then(function () {
+    .then(() => {
       return knex('movies').insert(movies);
     });
 };
