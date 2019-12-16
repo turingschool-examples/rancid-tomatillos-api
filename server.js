@@ -55,7 +55,7 @@ app.get('/api/v1/movies', (request, response) => {
 
               movie.average_rating = ratingsSum/ratings.length;  
             } else {
-              movie.average_rating = 0;
+              movie.average_rating = null;
             }
             
             return movie;
