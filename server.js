@@ -45,8 +45,23 @@ app.get('/api/v1/movies', (request, response) => {
   database('movies').select()
     .then(movies => {
       // Iterate through each movie, calculate average rating, and then put that in with the movie data
+      Promise.all(movies.map(movie => {
+        return database('usersReviews').where({movie_id: movie.id})
+          .then(ratings => {
+            if (ratings.length) {
+              const ratingsSum = ratings.reduce((ratingsSum, rating) => {
+                return ratingsSum += rating.rating;
+              }, 0);
 
-      return response.status(200).json({ movies })
+              movie.average_rating = ratingsSum/ratings.length;  
+            } else {
+              movie.average_rating = 0;
+            }
+            
+            return movie;
+          })
+      }))
+      .then(movies => response.status(200).json({ movies }))
     })
     .catch(error => response.status(500).json({ error }));
 });
@@ -95,6 +110,33 @@ app.post('/api/v1/users/:user_id/ratings', (request, response) => {
               // Add rating for user
               database('usersReviews').insert({ user_id, movie_id, rating }, ['user_id', 'movie_id', 'rating'])
                 .then(rating => response.status(201).json({ rating: rating[0] }))
+                .catch(error => response.status(500).json({ error }));
+            }
+          })
+      }
+    })
+    .catch(error => response.status(500).json({ error }));
+});
+
+// DELETE rating for a user
+app.delete('/api/v1/users/:user_id/ratings/:rating_id', (request, response) => {
+  const { user_id, rating_id } = request.params;
+
+  // Check if user exists
+  database('users').where({ id: user_id })
+    .then(users => {
+      if (!users.length) {
+        return response.status(404).json({ error: `No user found with id:${user_id}`});
+      } else {
+        database('usersReviews').where({ id: rating_id, user_id })
+          .then(ratings => {
+            // Check if there is a rating to delete
+            if (!ratings.length) {
+              return response.status(404).json({ error: `No rating found with id:${rating_id} for user_id:${user_id}`});
+            } else {
+              // Delete the rating
+              database('usersReviews').where({ id: rating_id, user_id }).del()
+                .then(() => response.sendStatus(204))
                 .catch(error => response.status(500).json({ error }));
             }
           })
