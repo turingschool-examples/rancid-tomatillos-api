@@ -107,10 +107,18 @@ app.post('/api/v1/users/:user_id/ratings', (request, response) => {
             if (!movies.length) {
               return response.status(422).json({ error: `No movie found with id:${movie_id}`});
             } else {
-              // Add rating for user
-              database('usersReviews').insert({ user_id, movie_id, rating }, ['user_id', 'movie_id', 'rating'])
-                .then(rating => response.status(201).json({ rating: rating[0] }))
-                .catch(error => response.status(500).json({ error }));
+              // Check if there is already a rating for that movie from that user
+              database('usersReviews').where({ user_id, movie_id })
+                .then(reviews => {
+                  if (reviews.length) {
+                    return response.status(400).json({ error: `User (id=${user_id}) already has a review for movie (id=${movie_id}). To change the review, delete the existing review and submit a new review.`})
+                  } else {
+                    // Add rating for user
+                    database('usersReviews').insert({ user_id, movie_id, rating }, ['user_id', 'movie_id', 'rating'])
+                      .then(rating => response.status(201).json({ rating: rating[0] }))
+                      .catch(error => response.status(500).json({ error }));
+                  }
+                })
             }
           })
       }
