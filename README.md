@@ -8,7 +8,13 @@ Documentation for the endpoints is found in the project spec.
 
 There is seed data in the `./db/seeds/dev` directory that is used for both dev and production environments. The movie data is gathered from the Movie DB API using this endpoint: https://developers.themoviedb.org/3/movies/get-now-playing
 
+There is a request that runs for the movies seed data. It requires a `.env` file with a MOVIE_DB_APIKEY key and the value is your own MovieDB key (this file is intentionally gitignored by default to not push up your API key). The `.env` file would look something like:
+
+```
+MOVIE_DB_APIKEY=yourAPIKeyValue
+```
+
 ## To Do
 
 * Refactor endpoint checks for valid user or move ids into middleware to clean up the endpoint functionality. It's very nested right now.
-* Write function to clean movie data from the Movie DB API so that it does not require editing by hand
+* Move seed file table deletions to their own file to run in the correct order if re-seeding
