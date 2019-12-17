@@ -17,4 +17,3 @@ MOVIE_DB_APIKEY=yourAPIKeyValue
 ## To Do
 
 * Refactor endpoint checks for valid user or move ids into middleware to clean up the endpoint functionality. It's very nested right now.
-* Move seed file table deletions to their own file to run in the correct order if re-seeding
