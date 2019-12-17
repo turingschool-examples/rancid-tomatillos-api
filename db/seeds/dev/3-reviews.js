@@ -4,13 +4,9 @@ const generateValueWithinRange = (min, max, precision) => {
 };
 
 exports.seed = function(knex) {
-  return knex('usersReviews').del()
-    .then(() => {
-      // Find user Alan
-      return knex('users').where({ name: 'Alan' }).first()
-    })
+  return knex('users').where({ name: 'Alan' }).first()
     .then(alan => {
-      // Insert reviews for first 5 movies in DB
+      // Insert reviews for all movies in DB (only for Alan)
       return knex('movies').select()
         .then(movies => {
           return Promise.all(movies.map(movie => {

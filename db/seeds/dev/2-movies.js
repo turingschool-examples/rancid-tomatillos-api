@@ -22,11 +22,8 @@ const fetchMovies = () => {
 };
 
 exports.seed = (knex) => {
-  return knex('movies').del()
-    .then(() => {
-      return fetchMovies()
-        .then(cleanedMovies => {
-          return knex('movies').insert(cleanedMovies);
-        })
+  return fetchMovies()
+    .then(cleanedMovies => {
+      return knex('movies').insert(cleanedMovies);
     });
 };
