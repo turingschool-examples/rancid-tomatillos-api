@@ -24,6 +24,21 @@ const verifyBodyProperties = (propertiesToCheck) => {
   }
 };
 
+// Check if user exists middleware
+const checkIfUserParamExists = (request, response, next) => {
+  const { user_id } = request.params;
+
+  database('users').where({ id: user_id })
+    .then(users => {
+      if (!users.length) {
+        return response.status(404).json({ error: `No user found with id:${user_id}`});
+      } else {
+        next();
+      }
+    })
+    .catch(error => response.status(500).json({ error }));
+}
+
 // POST to login user
 app.post('/api/v1/login', verifyBodyProperties(['email', 'password']), (request, response) => {
   const { email, password } = request.body;
@@ -67,58 +82,40 @@ app.get('/api/v1/movies', (request, response) => {
 });
 
 // GET all ratings for a user
-app.get('/api/v1/users/:user_id/ratings', (request, response) => {
+app.get('/api/v1/users/:user_id/ratings', checkIfUserParamExists, (request, response) => {
   const { user_id } = request.params;
 
-  // Check if user exists
-  database('users').where({ id: user_id })
-    .then(users => {
-      if (!users.length) {
-        return response.status(404).json({ error: `No user found with id:${user_id}`});
-      } else {
-        // Send that user's ratings
-        database('usersReviews').where({ user_id })
-          .then(ratings => response.status(200).json({ ratings }))
-          .catch(error => response.status(500).json({ error }));
-      }
-    })
+  database('usersReviews').where({ user_id })
+    .then(ratings => response.status(200).json({ ratings }))
     .catch(error => response.status(500).json({ error }));
 });
 
 // POST new rating for a user
-app.post('/api/v1/users/:user_id/ratings', (request, response) => {
+app.post('/api/v1/users/:user_id/ratings', checkIfUserParamExists, verifyBodyProperties(['movie_id', 'rating']), (request, response) => {
   const { user_id } = request.params;
-  const { movie_id, rating } = request.body; 
+  const { movie_id, rating } = request.body;
 
   // Check that rating is integer between 1 and 10
   if (!Number.isInteger(rating) || rating < 1 || rating > 10 ) {
     return response.status(422).json({ error: 'Rating must be an integer between 1 and 10' });
   }
 
-  // Check if user exists
-  database('users').where({ id: user_id })
-    .then(users => {
-      if (!users.length) {
-        return response.status(404).json({ error: `No user found with id:${user_id}`});
+  // Check is movie exists
+  database('movies').where({id: movie_id})
+    .then(movies => {
+      if (!movies.length) {
+        return response.status(422).json({ error: `No movie found with id:${movie_id}`});
       } else {
-        // Check is movie exists
-        database('movies').where({id: movie_id})
-          .then(movies => {
-            if (!movies.length) {
-              return response.status(422).json({ error: `No movie found with id:${movie_id}`});
+        // Check if there is already a rating for that movie from that user
+        database('usersReviews').where({ user_id, movie_id })
+          .then(reviews => {
+            if (reviews.length) {
+              return response.status(400).json({ error: `User (id=${user_id}) already has a review for movie (id=${movie_id}). To change the review, delete the existing review and submit a new review.`})
             } else {
-              // Check if there is already a rating for that movie from that user
-              database('usersReviews').where({ user_id, movie_id })
-                .then(reviews => {
-                  if (reviews.length) {
-                    return response.status(400).json({ error: `User (id=${user_id}) already has a review for movie (id=${movie_id}). To change the review, delete the existing review and submit a new review.`})
-                  } else {
-                    // Add rating for user
-                    database('usersReviews').insert({ user_id, movie_id, rating }, ['user_id', 'movie_id', 'rating'])
-                      .then(rating => response.status(201).json({ rating: rating[0] }))
-                      .catch(error => response.status(500).json({ error }));
-                  }
-                })
+              // Add rating for user
+              database('usersReviews').insert({ user_id, movie_id, rating }, ['user_id', 'movie_id', 'rating'])
+                .then(rating => response.status(201).json({ rating: rating[0] }))
+                .catch(error => response.status(500).json({ error }));
             }
           })
       }
@@ -127,27 +124,19 @@ app.post('/api/v1/users/:user_id/ratings', (request, response) => {
 });
 
 // DELETE rating for a user
-app.delete('/api/v1/users/:user_id/ratings/:rating_id', (request, response) => {
+app.delete('/api/v1/users/:user_id/ratings/:rating_id', checkIfUserParamExists, (request, response) => {
   const { user_id, rating_id } = request.params;
 
-  // Check if user exists
-  database('users').where({ id: user_id })
-    .then(users => {
-      if (!users.length) {
-        return response.status(404).json({ error: `No user found with id:${user_id}`});
+  database('usersReviews').where({ id: rating_id, user_id })
+    .then(ratings => {
+      // Check if there is a rating to delete
+      if (!ratings.length) {
+        return response.status(404).json({ error: `No rating found with id:${rating_id} for user_id:${user_id}`});
       } else {
-        database('usersReviews').where({ id: rating_id, user_id })
-          .then(ratings => {
-            // Check if there is a rating to delete
-            if (!ratings.length) {
-              return response.status(404).json({ error: `No rating found with id:${rating_id} for user_id:${user_id}`});
-            } else {
-              // Delete the rating
-              database('usersReviews').where({ id: rating_id, user_id }).del()
-                .then(() => response.sendStatus(204))
-                .catch(error => response.status(500).json({ error }));
-            }
-          })
+        // Delete the rating
+        database('usersReviews').where({ id: rating_id, user_id }).del()
+          .then(() => response.sendStatus(204))
+          .catch(error => response.status(500).json({ error }));
       }
     })
     .catch(error => response.status(500).json({ error }));
