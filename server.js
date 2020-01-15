@@ -142,7 +142,10 @@ app.delete('/api/v1/users/:user_id/ratings/:rating_id', checkIfUserParamExists, 
     .catch(error => response.status(500).json({ error }));
 });
 
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(app.get('port'), () => {
+    console.log(`Rotten Tomatillos backend server running on http://localhost:${app.get('port')}`);
+  });
+}
 
-app.listen(app.get('port'), () => {
-  console.log(`Rotten Tomatillos backend server running on http://localhost:${app.get('port')}`);
-});
+module.exports = {app, database};
