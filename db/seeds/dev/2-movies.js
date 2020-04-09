@@ -13,7 +13,6 @@ const fetchMovies = () => {
   })
   return Promise.all(moviePagePromises)
     .then(moviePages => {
-      console.log(moviePages);
       return [].concat.apply([], moviePages).map(movie => {
         const { title, overview, release_date } = movie;
 
