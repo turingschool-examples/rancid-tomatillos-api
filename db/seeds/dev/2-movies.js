@@ -4,10 +4,17 @@ const fetch = require('node-fetch');
 require('dotenv').config();
 
 const fetchMovies = () => {
-  return fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_DB_APIKEY}&language=en-US&page=1`)
-    .then(response => response.json())
-    .then(movies => {
-      return movies.results.map(movie => {
+  const pages = [1, 2];
+
+  const moviePagePromises = pages.map(pageNum => {
+    return fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_DB_APIKEY}&language=en-US&page=${pageNum}`)
+      .then(response => response.json())
+      .then(movieData => movieData.results)
+  })
+  return Promise.all(moviePagePromises)
+    .then(moviePages => {
+      console.log(moviePages);
+      return [].concat.apply([], moviePages).map(movie => {
         const { title, overview, release_date } = movie;
 
         return {
