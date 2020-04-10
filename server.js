@@ -37,7 +37,25 @@ const checkIfUserParamExists = (request, response, next) => {
       }
     })
     .catch(error => response.status(500).json({ error }));
-}
+};
+
+// Calculate a movie's average review
+const calculateAverageRatingForMovie = movie => {
+  return database('usersReviews').where({movie_id: movie.id})
+    .then(ratings => {
+      if (ratings.length) {
+        const ratingsSum = ratings.reduce((ratingsSum, rating) => {
+          return ratingsSum += rating.rating;
+        }, 0);
+
+        movie.average_rating = ratingsSum/ratings.length;
+      } else {
+        movie.average_rating = null;
+      }
+
+      return movie;
+    });
+};
 
 // POST to login user
 app.post('/api/v1/login', verifyBodyProperties(['email', 'password']), (request, response) => {
@@ -61,22 +79,29 @@ app.get('/api/v1/movies', (request, response) => {
     .then(movies => {
       // Iterate through each movie, calculate average rating, and then put that in with the movie data
       Promise.all(movies.map(movie => {
-        return database('usersReviews').where({movie_id: movie.id})
-          .then(ratings => {
-            if (ratings.length) {
-              const ratingsSum = ratings.reduce((ratingsSum, rating) => {
-                return ratingsSum += rating.rating;
-              }, 0);
-
-              movie.average_rating = ratingsSum/ratings.length;  
-            } else {
-              movie.average_rating = null;
-            }
-            
-            return movie;
-          })
+        return calculateAverageRatingForMovie(movie);
       }))
       .then(movies => response.status(200).json({ movies }))
+    })
+    .catch(error => response.status(500).json({ error }));
+});
+
+// GET a particular movie with it's average rating
+app.get('/api/v1/movies/:movie_id', (request, response) => {
+  const { movie_id } = request.params;
+
+  // Check is movie exists
+  database('movies').where({id: movie_id})
+    .then(movies => {
+      if (!movies.length) {
+        return response.status(422).json({ error: `No movie found with id:${movie_id}`});
+      } else {
+        calculateAverageRatingForMovie(movies[0])
+          .then(movie => {
+            return response.status(200).json({ movie });
+          })
+          .catch(error => response.status(500).json({ error }));
+      }
     })
     .catch(error => response.status(500).json({ error }));
 });

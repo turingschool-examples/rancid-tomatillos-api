@@ -16,8 +16,24 @@ exports.seed = function(knex) {
               rating: 5
             });
           }));
-        });
-    });
+        })
+        .then(() => {
+          return knex('users').where({ name: 'Sam' }).first()
+            .then(sam => {
+              // Insert reviews for all movies in DB (only for Sam)
+              return knex('movies').select()
+                .then(movies => {
+                  return Promise.all(movies.map(movie => {
+                    return knex('usersReviews').insert({
+                      user_id: sam.id,
+                      movie_id: movie.id,
+                      rating: 10
+                    });
+                  }));
+                });
+        })
+      })
+    })
 
-    // Do this for another user as well (rating of 10 to average out to 7.5)
+    // Reviews should average to be 7.5
 };
