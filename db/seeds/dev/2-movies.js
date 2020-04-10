@@ -16,9 +16,16 @@ const fetchMovies = () => {
       return [].concat.apply([], moviePages).map(movie => {
         const { title, overview, release_date } = movie;
 
+        const full_poster_path = 'https://image.tmdb.org/t/p/original/' + movie.poster_path;
+        let full_backdrop_path = 'https://image.tmdb.org/t/p/original/' + movie.backdrop_path
+
+        if (!movie.backdrop_path) {
+          full_backdrop_path = 'https://www.esm.rochester.edu/uploads/NoPhotoAvailable.jpg';
+        }
+
         return {
-          poster_path: "https://image.tmdb.org/t/p/original/" + movie.poster_path,
-          backdrop_path: "https://image.tmdb.org/t/p/original/" + movie.backdrop_path,
+          poster_path: full_poster_path,
+          backdrop_path: full_backdrop_path,
           title,
           overview,
           release_date
