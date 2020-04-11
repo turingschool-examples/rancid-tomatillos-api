@@ -124,7 +124,7 @@ app.get('/api/v1/users/:user_id/ratings', checkIfUserParamExists, (request, resp
 });
 
 // POST new rating for a user
-app.post('/api/v1/users/:user_id/ratings', checkIfUserParamExists, verifyBodyProperties(['movie_id', 'rating']), (request, response) => {
+app.post('/api/v1/users/:user_id/ratings', checkIfUserParamExists, verifyBodyProperties(['movie_id', 'rating']), checkIfMovieExists('body'), (request, response) => {
   const { user_id } = request.params;
   const { movie_id, rating } = request.body;
 
@@ -133,24 +133,16 @@ app.post('/api/v1/users/:user_id/ratings', checkIfUserParamExists, verifyBodyPro
     return response.status(422).json({ error: 'Rating must be an integer between 1 and 10' });
   }
 
-  // Check is movie exists
-  database('movies').where({id: movie_id})
-    .then(movies => {
-      if (!movies.length) {
-        return response.status(422).json({ error: `No movie found with id:${movie_id}`});
+  // Check if there is already a rating for that movie from that user
+  database('usersReviews').where({ user_id, movie_id })
+    .then(reviews => {
+      if (reviews.length) {
+        return response.status(400).json({ error: `User (id=${user_id}) already has a review for movie (id=${movie_id}). To change the review, delete the existing review and submit a new review.`})
       } else {
-        // Check if there is already a rating for that movie from that user
-        database('usersReviews').where({ user_id, movie_id })
-          .then(reviews => {
-            if (reviews.length) {
-              return response.status(400).json({ error: `User (id=${user_id}) already has a review for movie (id=${movie_id}). To change the review, delete the existing review and submit a new review.`})
-            } else {
-              // Add rating for user
-              database('usersReviews').insert({ user_id, movie_id, rating }, ['user_id', 'movie_id', 'rating'])
-                .then(rating => response.status(201).json({ rating: rating[0] }))
-                .catch(error => response.status(500).json({ error }));
-            }
-          })
+        // Add rating for user
+        database('usersReviews').insert({ user_id, movie_id, rating }, ['user_id', 'movie_id', 'rating'])
+          .then(rating => response.status(201).json({ rating: rating[0] }))
+          .catch(error => response.status(500).json({ error }));
       }
     })
     .catch(error => response.status(500).json({ error }));
