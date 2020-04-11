@@ -39,20 +39,18 @@ const checkIfUserParamExists = (request, response, next) => {
     .catch(error => response.status(500).json({ error }));
 };
 
-// Check if movie exists from request body
-const checkIfMovieExistsFromBody = (request, response, next) => {
+// Check if movie exists from with request params or request body
+const checkIfMovieExists = (idLocation) => {
+  // idLocation should be either 'params' or 'body'
+  return function(request, response, next) {
+    const { movie_id } = request[idLocation];
 
-};
-
-// Check if movie exists from request parameter
-const checkIfMovieExistsFromParam = (request, response, next) => {
-  const { movie_id } = request.params;
-
-  database('movies').where({id: movie_id})
-    .then(movies => {
-      return movies.length ? next() : response.status(404).json({ error: `No movie found with id:${movie_id}`});
-    })
-    .catch(error => response.status(500).json({ error }));
+    database('movies').where({id: movie_id})
+      .then(movies => {
+        return movies.length ? next() : response.status(404).json({ error: `No movie found with id:${movie_id}`});
+      })
+      .catch(error => response.status(500).json({ error }));
+  }
 };
 
 // Calculate a movie's average review
@@ -103,7 +101,7 @@ app.get('/api/v1/movies', (request, response) => {
 });
 
 // GET a particular movie with it's average rating
-app.get('/api/v1/movies/:movie_id', checkIfMovieExistsFromParam, (request, response) => {
+app.get('/api/v1/movies/:movie_id', checkIfMovieExists('params'), (request, response) => {
   const { movie_id } = request.params;
 
   database('movies').where({id: movie_id})
