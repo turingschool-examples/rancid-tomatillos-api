@@ -30,11 +30,7 @@ const checkIfUserParamExists = (request, response, next) => {
 
   database('users').where({ id: user_id })
     .then(users => {
-      if (!users.length) {
-        return response.status(404).json({ error: `No user found with id:${user_id}`});
-      } else {
-        next();
-      }
+      return users.length ? next() : response.status(404).json({ error: `No user found with id:${user_id}`});
     })
     .catch(error => response.status(500).json({ error }));
 };
