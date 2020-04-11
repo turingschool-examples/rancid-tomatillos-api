@@ -25,7 +25,7 @@ const verifyBodyProperties = (propertiesToCheck) => {
 };
 
 // Check if user exists middleware
-const checkIfUserParamExists = (request, response, next) => {
+const checkIfUserExistsFromParam = (request, response, next) => {
   const { user_id } = request.params;
 
   database('users').where({ id: user_id })
@@ -35,7 +35,7 @@ const checkIfUserParamExists = (request, response, next) => {
     .catch(error => response.status(500).json({ error }));
 };
 
-// Check if movie exists from with request params or request body
+// Check if movie exists from request params or request body
 const checkIfMovieExists = (idLocation) => {
   // idLocation should be either 'params' or 'body'
   return function(request, response, next) {
@@ -111,7 +111,7 @@ app.get('/api/v1/movies/:movie_id', checkIfMovieExists('params'), (request, resp
 });
 
 // GET all ratings for a user
-app.get('/api/v1/users/:user_id/ratings', checkIfUserParamExists, (request, response) => {
+app.get('/api/v1/users/:user_id/ratings', checkIfUserExistsFromParam, (request, response) => {
   const { user_id } = request.params;
 
   database('usersReviews').where({ user_id })
@@ -120,7 +120,7 @@ app.get('/api/v1/users/:user_id/ratings', checkIfUserParamExists, (request, resp
 });
 
 // POST new rating for a user
-app.post('/api/v1/users/:user_id/ratings', checkIfUserParamExists, verifyBodyProperties(['movie_id', 'rating']), checkIfMovieExists('body'), (request, response) => {
+app.post('/api/v1/users/:user_id/ratings', checkIfUserExistsFromParam, verifyBodyProperties(['movie_id', 'rating']), checkIfMovieExists('body'), (request, response) => {
   const { user_id } = request.params;
   const { movie_id, rating } = request.body;
 
@@ -145,7 +145,7 @@ app.post('/api/v1/users/:user_id/ratings', checkIfUserParamExists, verifyBodyPro
 });
 
 // DELETE rating for a user
-app.delete('/api/v1/users/:user_id/ratings/:rating_id', checkIfUserParamExists, (request, response) => {
+app.delete('/api/v1/users/:user_id/ratings/:rating_id', checkIfUserExistsFromParam, (request, response) => {
   const { user_id, rating_id } = request.params;
 
   database('usersReviews').where({ id: rating_id, user_id })
