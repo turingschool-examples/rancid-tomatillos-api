@@ -21,11 +21,20 @@ const fetchMoviesAndSupportingData = () => {
   return Promise.all([moviePagesPromise, genresPromise]);
 };
 
+const replaceGenreIdsWithGenreName = (movieGenreIds, genreIdsAndNames) => {
+  return movieGenreIds.map(movieGenreId => {
+    const matchingGenre = genreIdsAndNames.find(genreIdAndName => genreIdAndName.id === movieGenreId);
+    return matchingGenre.name;
+  });
+};
+
 const buildMovieData = moviesAndSupportingData => {
-  const [movies, genres] = moviesAndSupportingData;
+  const [movies, genreIdsAndNames] = moviesAndSupportingData;
 
   return movies.map(movie => {
-    const { id, title, overview, release_date } = movie;
+    const { id, title, overview, release_date, genre_ids } = movie;
+
+    const genres = replaceGenreIdsWithGenreName(genre_ids, genreIdsAndNames);
 
     const full_poster_path = 'https://image.tmdb.org/t/p/original/' + movie.poster_path;
     let full_backdrop_path = 'https://image.tmdb.org/t/p/original/' + movie.backdrop_path;
@@ -40,7 +49,8 @@ const buildMovieData = moviesAndSupportingData => {
       backdrop_path: full_backdrop_path,
       title,
       overview,
-      release_date
+      release_date,
+      genres: JSON.stringify(genres)
     };
   });
 };

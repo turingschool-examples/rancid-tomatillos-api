@@ -15,6 +15,7 @@ exports.up = function(knex) {
       table.string('backdrop_path');
       table.string('release_date');
       table.text('overview');
+      table.json('genres'); // I don't like doing this, but it's simpler compared to making a whole other genres table (many-to-many)
     }),
 
     knex.schema.createTable('usersReviews', function(table) {
