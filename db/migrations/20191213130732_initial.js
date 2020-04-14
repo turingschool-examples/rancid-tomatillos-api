@@ -9,13 +9,13 @@ exports.up = function(knex) {
     }),
 
     knex.schema.createTable('movies', function(table) {
-      table.increments('id').primary();
+      table.integer('id').primary().unsigned().unique(); // using id from movieDB API
       table.string('title');
       table.string('poster_path');
       table.string('backdrop_path');
       table.string('release_date');
       table.text('overview');
-    }),    
+    }),
 
     knex.schema.createTable('usersReviews', function(table) {
       table.increments('id').primary();
