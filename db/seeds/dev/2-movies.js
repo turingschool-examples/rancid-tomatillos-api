@@ -10,7 +10,8 @@ const fetchMovies = () => {
     return fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_DB_APIKEY}&language=en-US&page=${pageNum}`)
       .then(response => response.json())
       .then(movieData => movieData.results)
-  })
+  });
+
   return Promise.all(moviePagePromises)
     .then(moviePages => {
       return [].concat.apply([], moviePages).map(movie => {
@@ -38,5 +39,6 @@ exports.seed = (knex) => {
   return fetchMovies()
     .then(cleanedMovies => {
       return knex('movies').insert(cleanedMovies);
-    });
+    })
+    .catch(err => console.log('Error seeding movies:', err));
 };
