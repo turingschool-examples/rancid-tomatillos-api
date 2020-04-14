@@ -13,7 +13,3 @@ There is a request that runs for the movies seed data. It requires a `.env` file
 ```
 MOVIE_DB_APIKEY=yourAPIKeyValue
 ```
-
-## To Do
-
-* Refactor endpoint checks for valid user or move ids into middleware to clean up the endpoint functionality. It's very nested right now.
