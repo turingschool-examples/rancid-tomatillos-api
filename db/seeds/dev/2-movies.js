@@ -28,6 +28,17 @@ const replaceGenreIdsWithGenreName = (movieGenreIds, genreIdsAndNames) => {
   });
 };
 
+const formatImageURLs = movie => {
+  const full_poster_path = 'https://image.tmdb.org/t/p/original/' + movie.poster_path;
+  let full_backdrop_path = 'https://image.tmdb.org/t/p/original/' + movie.backdrop_path;
+
+  if (!movie.backdrop_path) {
+    full_backdrop_path = 'https://www.esm.rochester.edu/uploads/NoPhotoAvailable.jpg';
+  }
+
+  return { full_poster_path, full_backdrop_path }
+};
+
 const buildMovieData = moviesAndSupportingData => {
   const [movies, genreIdsAndNames] = moviesAndSupportingData;
 
@@ -35,13 +46,7 @@ const buildMovieData = moviesAndSupportingData => {
     const { id, title, overview, release_date, genre_ids } = movie;
 
     const genres = replaceGenreIdsWithGenreName(genre_ids, genreIdsAndNames);
-
-    const full_poster_path = 'https://image.tmdb.org/t/p/original/' + movie.poster_path;
-    let full_backdrop_path = 'https://image.tmdb.org/t/p/original/' + movie.backdrop_path;
-
-    if (!movie.backdrop_path) {
-      full_backdrop_path = 'https://www.esm.rochester.edu/uploads/NoPhotoAvailable.jpg';
-    }
+    const { full_poster_path, full_backdrop_path } = formatImageURLs(movie);
 
     return {
       id,
