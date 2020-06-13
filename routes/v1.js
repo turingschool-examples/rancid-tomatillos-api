@@ -5,10 +5,6 @@ const environment = process.env.NODE_ENV || 'development';
 const configuration = require('../knexfile')[environment]['v1'];
 const v1Database = require('knex')(configuration);
 
-v1Router.get('/', (request, response) => {
-  response.status(200).json({hello: 'Head on over to /api/v1/movies to start getting movies'});
-});
-
 // Body-checking middleware
 const verifyBodyProperties = (propertiesToCheck) => {
   return function(request, response, next) {

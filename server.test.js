@@ -1,17 +1,17 @@
 
-const {app, database} = require('./server');
+const {app, v1Database} = require('./server');
 const request = require('supertest');
 
 beforeEach(async () => {
   // Reset seed db with primary keys reset
-  await database.migrate.rollback();
-  await database.migrate.latest();
-  await database.seed.run();
+  await v1Database.migrate.rollback();
+  await v1Database.migrate.latest();
+  await v1Database.seed.run();
 })
 
 afterAll(() => {
   // Stop database connection after tests are complete
-  database.destroy();
+  v1Database.destroy();
 })
 
 describe('Root path', () => {
