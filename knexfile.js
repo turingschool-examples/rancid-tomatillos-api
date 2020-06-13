@@ -1,25 +1,35 @@
 module.exports = {
   development: {
-    client: 'pg',
-    connection: 'postgres://localhost/rancid_tomatillos',
-    migrations: {
-      directory: './db/migrations'
+    v1: {
+      client: 'pg',
+      connection: 'postgres://localhost/rancid_tomatillos',
+      migrations: {
+        directory: './db/migrations'
+      },
+      seeds: {
+        directory: './db/seeds/test'
+      },
+      useNullAsDefault: true
     },
-    seeds: {
-      directory: './db/seeds/dev'
-    },
-    useNullAsDefault: true
+    v2: {
+
+    }
   },
   test: {
-    client: 'pg',
-    connection: 'postgres://localhost/rancid_tomatillos',
-    migrations: {
-      directory: './db/migrations'
+    v1: {
+      client: 'pg',
+      connection: 'postgres://localhost/rancid_tomatillos',
+      migrations: {
+        directory: './db/migrations'
+      },
+      seeds: {
+        directory: './db/seeds/test'
+      },
+      useNullAsDefault: true
     },
-    seeds: {
-      directory: './db/seeds/test'
-    },
-    useNullAsDefault: true
+    v2: {
+
+    }
   },
   production: {
     client: 'pg',
