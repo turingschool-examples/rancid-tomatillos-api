@@ -24,4 +24,4 @@ And then running the migrations up to the latest migration:
 
 `knex --knexfile=./knexfile-v2.js migrate:latest`
 
-Where `v1` and `v2` would change.
+Where `v1` and `v2` would change. The same goes for database seed commands.
