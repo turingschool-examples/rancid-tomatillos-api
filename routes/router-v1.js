@@ -1,9 +1,9 @@
 const express = require('express');
-const v1Router = express.Router();
+const routerV1 = express.Router();
 
 const environment = process.env.NODE_ENV || 'development';
-const configuration = require('../knexfile')[environment]['v1'];
-const v1Database = require('knex')(configuration);
+const configuration = require('../knexfile-v1')[environment];
+const databaseV1 = require('knex')(configuration);
 
 // Body-checking middleware
 const verifyBodyProperties = (propertiesToCheck) => {
@@ -19,7 +19,7 @@ const verifyBodyProperties = (propertiesToCheck) => {
 const checkIfUserExistsFromParam = (request, response, next) => {
   const { user_id } = request.params;
 
-  v1Database('users').where({ id: user_id })
+  databaseV1('users').where({ id: user_id })
     .then(users => {
       return users.length ? next() : response.status(404).json({ error: `No user found with id:${user_id}`});
     })
@@ -32,7 +32,7 @@ const checkIfMovieExists = (idLocation) => {
   return function(request, response, next) {
     const { movie_id } = request[idLocation];
 
-    v1Database('movies').where({id: movie_id})
+    databaseV1('movies').where({id: movie_id})
       .then(movies => {
         return movies.length ? next() : response.status(404).json({ error: `No movie found with id:${movie_id}`});
       })
@@ -42,7 +42,7 @@ const checkIfMovieExists = (idLocation) => {
 
 // Calculate a movie's average review
 const calculateAverageRatingForMovie = movie => {
-  return v1Database('usersReviews').where({movie_id: movie.id})
+  return databaseV1('usersReviews').where({movie_id: movie.id})
     .then(ratings => {
       if (ratings.length) {
         const ratingsSum = ratings.reduce((ratingsSum, rating) => {
@@ -59,10 +59,10 @@ const calculateAverageRatingForMovie = movie => {
 };
 
 // POST to login user
-v1Router.post('/login', verifyBodyProperties(['email', 'password']), (request, response) => {
+routerV1.post('/login', verifyBodyProperties(['email', 'password']), (request, response) => {
   const { email, password } = request.body;
 
-  v1Database('users').where({ email, password })
+  databaseV1('users').where({ email, password })
     .then(users => {
       if (users.length) {
         const { id, name, email } = users[0];
@@ -75,8 +75,8 @@ v1Router.post('/login', verifyBodyProperties(['email', 'password']), (request, r
 });
 
 // GET all movies and calculate average rating
-v1Router.get('/movies', (request, response) => {
-  v1Database('movies').select()
+routerV1.get('/movies', (request, response) => {
+  databaseV1('movies').select()
     .then(movies => {
       // Iterate through each movie, calculate average rating, and then put that in with the movie data
       Promise.all(movies.map(movie => {
@@ -88,10 +88,10 @@ v1Router.get('/movies', (request, response) => {
 });
 
 // GET a particular movie with it's average rating
-v1Router.get('/movies/:movie_id', checkIfMovieExists('params'), (request, response) => {
+routerV1.get('/movies/:movie_id', checkIfMovieExists('params'), (request, response) => {
   const { movie_id } = request.params;
 
-  v1Database('movies').where({id: movie_id})
+  databaseV1('movies').where({id: movie_id})
     .then(movies => {
       return calculateAverageRatingForMovie(movies[0])
         .then(movie => {
@@ -102,16 +102,16 @@ v1Router.get('/movies/:movie_id', checkIfMovieExists('params'), (request, respon
 });
 
 // GET all ratings for a user
-v1Router.get('/users/:user_id/ratings', checkIfUserExistsFromParam, (request, response) => {
+routerV1.get('/users/:user_id/ratings', checkIfUserExistsFromParam, (request, response) => {
   const { user_id } = request.params;
 
-  v1Database('usersReviews').where({ user_id })
+  databaseV1('usersReviews').where({ user_id })
     .then(ratings => response.status(200).json({ ratings }))
     .catch(error => response.status(500).json({ error }));
 });
 
 // POST new rating for a user
-v1Router.post('/users/:user_id/ratings', checkIfUserExistsFromParam, verifyBodyProperties(['movie_id', 'rating']), checkIfMovieExists('body'), (request, response) => {
+routerV1.post('/users/:user_id/ratings', checkIfUserExistsFromParam, verifyBodyProperties(['movie_id', 'rating']), checkIfMovieExists('body'), (request, response) => {
   const { user_id } = request.params;
   const { movie_id, rating } = request.body;
 
@@ -121,13 +121,13 @@ v1Router.post('/users/:user_id/ratings', checkIfUserExistsFromParam, verifyBodyP
   }
 
   // Check if there is already a rating for that movie from that user
-  v1Database('usersReviews').where({ user_id, movie_id })
+  databaseV1('usersReviews').where({ user_id, movie_id })
     .then(reviews => {
       if (reviews.length) {
         return response.status(400).json({ error: `User (id=${user_id}) already has a review for movie (id=${movie_id}). To change the review, delete the existing review and submit a new review.`})
       } else {
         // Add rating for user
-        v1Database('usersReviews').insert({ user_id, movie_id, rating }, ['user_id', 'movie_id', 'rating'])
+        databaseV1('usersReviews').insert({ user_id, movie_id, rating }, ['user_id', 'movie_id', 'rating'])
           .then(rating => response.status(201).json({ rating: rating[0] }))
           .catch(error => response.status(500).json({ error }));
       }
@@ -136,17 +136,17 @@ v1Router.post('/users/:user_id/ratings', checkIfUserExistsFromParam, verifyBodyP
 });
 
 // DELETE rating for a user
-v1Router.delete('/users/:user_id/ratings/:rating_id', checkIfUserExistsFromParam, (request, response) => {
+routerV1.delete('/users/:user_id/ratings/:rating_id', checkIfUserExistsFromParam, (request, response) => {
   const { user_id, rating_id } = request.params;
 
-  v1Database('usersReviews').where({ id: rating_id, user_id })
+  databaseV1('usersReviews').where({ id: rating_id, user_id })
     .then(ratings => {
       // Check if there is a rating to delete
       if (!ratings.length) {
         return response.status(404).json({ error: `No rating found with id:${rating_id} for user_id:${user_id}`});
       } else {
         // Delete the rating
-        v1Database('usersReviews').where({ id: rating_id, user_id }).del()
+        databaseV1('usersReviews').where({ id: rating_id, user_id }).del()
           .then(() => response.sendStatus(204))
           .catch(error => response.status(500).json({ error }));
       }
@@ -154,4 +154,4 @@ v1Router.delete('/users/:user_id/ratings/:rating_id', checkIfUserExistsFromParam
     .catch(error => response.status(500).json({ error }));
 });
 
-module.exports = { v1Router, v1Database };
+module.exports = { routerV1, databaseV1 };
