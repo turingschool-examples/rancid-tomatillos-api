@@ -1,5 +1,5 @@
 
-const {app, databaseV1} = require('./server');
+const {app, databaseV1} = require('../server');
 const request = require('supertest');
 
 beforeEach(async () => {
