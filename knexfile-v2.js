@@ -3,10 +3,10 @@ module.exports = {
     client: 'pg',
     connection: 'postgres://localhost/rancid_tomatillos_v2',
     migrations: {
-      directory: './db/migrations'
+      directory: './db/v2/migrations'
     },
     seeds: {
-      directory: './db/seeds/test'
+      directory: './db/v2/seeds/dev'
     },
     useNullAsDefault: true
   },
@@ -14,10 +14,10 @@ module.exports = {
     client: 'pg',
     connection: 'postgres://localhost/rancid_tomatillos_v2',
     migrations: {
-      directory: './db/migrations'
+      directory: './db/v2/migrations'
     },
     seeds: {
-      directory: './db/seeds/test'
+      directory: './db/v2/seeds/test'
     },
     useNullAsDefault: true
   },
@@ -25,10 +25,10 @@ module.exports = {
     client: 'pg',
     connection: process.env.DATABASE_URL + '?ssl=true',
     migrations: {
-      directory: './db/migrations'
+      directory: './db/v2/migrations'
     },
     seeds: {
-      directory: './db/seeds/dev'
+      directory: './db/v2/seeds/dev'
     },
     useNullAsDefault: true
   }

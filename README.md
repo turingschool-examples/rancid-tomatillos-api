@@ -13,3 +13,7 @@ There is a request that runs for the movies seed data. It requires a `.env` file
 ```
 MOVIE_DB_APIKEY=yourAPIKeyValue
 ```
+
+## Knex Commands with Multiple DBs
+
+`knex --knexfile=./knexfile-v2.js migrate:make initial`

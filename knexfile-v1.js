@@ -3,10 +3,10 @@ module.exports = {
     client: 'pg',
     connection: 'postgres://localhost/rancid_tomatillos_v1',
     migrations: {
-      directory: './db/migrations'
+      directory: './db/v1/migrations'
     },
     seeds: {
-      directory: './db/seeds/test'
+      directory: './db/v1/seeds/dev'
     },
     useNullAsDefault: true
   },
@@ -14,10 +14,10 @@ module.exports = {
     client: 'pg',
     connection: 'postgres://localhost/rancid_tomatillos_v1',
     migrations: {
-      directory: './db/migrations'
+      directory: './db/v1/migrations'
     },
     seeds: {
-      directory: './db/seeds/test'
+      directory: './db/v1/seeds/test'
     },
     useNullAsDefault: true
   },
@@ -25,10 +25,10 @@ module.exports = {
     client: 'pg',
     connection: process.env.HEROKU_POSTGRESQL_NAVY_URL + '?ssl=true',
     migrations: {
-      directory: './db/migrations'
+      directory: './db/v1/migrations'
     },
     seeds: {
-      directory: './db/seeds/dev'
+      directory: './db/v1/seeds/dev'
     },
     useNullAsDefault: true
   }
