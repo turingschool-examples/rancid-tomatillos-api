@@ -14,6 +14,8 @@ There is a request that runs for the movies seed data. It requires a `.env` file
 MOVIE_DB_APIKEY=yourAPIKeyValue
 ```
 
+On Heroku, the `MOVIE_DB_APIKEY` is set as a [config var](https://devcenter.heroku.com/articles/config-vars#using-the-heroku-dashboard).
+
 ## Knex Commands with Multiple DBs
 
 Since knex has an assumed directory structure with one database and one configuration file, you need to point to the database/config file you want to use for any knex commands. For instance, rolling back a migration set:
