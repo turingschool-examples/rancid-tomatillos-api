@@ -1,17 +1,17 @@
 
-const {app, database} = require('./server');
+const {app, databaseV2} = require('../server');
 const request = require('supertest');
 
 beforeEach(async () => {
   // Reset seed db with primary keys reset
-  await database.migrate.rollback();
-  await database.migrate.latest();
-  await database.seed.run();
+  await databaseV2.migrate.rollback({directory: './db/v2/migrations'});
+  await databaseV2.migrate.latest({directory: './db/v2/migrations'});
+  await databaseV2.seed.run({directory: './db/v2/seeds/test'});
 })
 
 afterAll(() => {
   // Stop database connection after tests are complete
-  database.destroy();
+  databaseV2.destroy();
 })
 
 describe('Root path', () => {
@@ -24,7 +24,7 @@ describe('Root path', () => {
 
 describe('Login', () => {
   it('should login a user', async () => {
-    const response = await request(app).post('/api/v1/login')
+    const response = await request(app).post('/api/v2/login')
                               .set('Content-Type', 'application/json')
                               .send({email: 'alan@turing.io', password: 'promisedotyall'});
 
@@ -33,7 +33,7 @@ describe('Login', () => {
   });
 
   it('should give a 422 response for missing an email', async () => {
-    const response = await request(app).post('/api/v1/login')
+    const response = await request(app).post('/api/v2/login')
                               .set('Content-Type', 'application/json')
                               .send({password: 'promisedotyall'});
 
@@ -42,7 +42,7 @@ describe('Login', () => {
   });
 
   it('should give a 422 response for missing an password', async () => {
-    const response = await request(app).post('/api/v1/login')
+    const response = await request(app).post('/api/v2/login')
                               .set('Content-Type', 'application/json')
                               .send({email: 'alan@turing.io'});
 
@@ -51,7 +51,7 @@ describe('Login', () => {
   });
 
   it('should give a 403 for incorrect email', async () => {
-    const response = await request(app).post('/api/v1/login')
+    const response = await request(app).post('/api/v2/login')
                               .set('Content-Type', 'application/json')
                               .send({email: 'bigsby@turing.io', password: 'promisedotyall'});
 
@@ -60,7 +60,7 @@ describe('Login', () => {
   });
 
   it('should give a 403 for incorrect password', async () => {
-    const response = await request(app).post('/api/v1/login')
+    const response = await request(app).post('/api/v2/login')
                               .set('Content-Type', 'application/json')
                               .send({email: 'alan@turing.io', password: '8675309'});
 
@@ -71,7 +71,7 @@ describe('Login', () => {
 
 describe('Movies', () => {
   it('should return all the movies with ratings', async () => {
-     const response = await request(app).get('/api/v1/movies');
+     const response = await request(app).get('/api/v2/movies');
 
      expect(response.status).toBe(200);
      expect(response.body.movies).toHaveLength(2);

@@ -13,3 +13,15 @@ There is a request that runs for the movies seed data. It requires a `.env` file
 ```
 MOVIE_DB_APIKEY=yourAPIKeyValue
 ```
+
+## Knex Commands with Multiple DBs
+
+Since knex has an assumed directory structure with one database and one configuration file, you need to point to the database/config file you want to use for any knex commands. For instance, rolling back a migration set:
+
+`knex --knexfile=./knexfile-v2.js migrate:rollback`
+
+And then running the migrations up to the latest migration:
+
+`knex --knexfile=./knexfile-v2.js migrate:latest`
+
+Where `v1` and `v2` would change. The same goes for database seed commands.
