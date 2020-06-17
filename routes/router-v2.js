@@ -58,6 +58,19 @@ const calculateAverageRatingForMovie = movie => {
     });
 };
 
+// Middleware to run probability function, and if it triggers, then send a non-200-level response
+const sendRandomErrorReponse = (chance) => {
+  return function(request, response, next) {
+    // a 1-in-"this value" chance of happening, if "chance" is 200, it's about a 1-in-200 chance
+    const randomInteger = Math.floor(Math.random() * chance) + 1;
+
+    if (randomInteger === 1) {
+      return response.status(500).json({error: 'Looks like the server randomly gave an error. Sorry, but sometimes servers are not very reliable!'});
+    }
+    next();
+  };
+};
+
 // POST to login user
 routerV2.post('/login', verifyBodyProperties(['email', 'password']), (request, response) => {
   const { email, password } = request.body;
