@@ -59,7 +59,7 @@ const calculateAverageRatingForMovie = movie => {
 };
 
 // Middleware to run probability function, and if it triggers, then send a non-200-level response
-const sendRandomErrorReponse = (chance) => {
+const sendErrorReponseRandomly = (chance) => {
   return function(request, response, next) {
     // a 1-in-"this value" chance of happening, if "chance" is 200, it's about a 1-in-200 chance
     const randomInteger = Math.floor(Math.random() * chance) + 1;
