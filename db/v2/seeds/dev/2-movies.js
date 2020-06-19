@@ -27,7 +27,7 @@ const fetchMovies = () => {
   .then(movies => fetchIndividualMovieDetails(movies));
 };
 
-const cleanGenres = genreIdsAndNames => {
+const extractNamesFromGenresList = genreIdsAndNames => {
   return genreIdsAndNames.map(genreIdAndName => {
     return genreIdAndName.name;
   });
@@ -49,7 +49,7 @@ const buildMovieData = movies => {
   return movies.map(movie => {
     const { id, title, overview, release_date, genres, budget, revenue, runtime, tagline } = movie;
 
-    const cleanedGenres = cleanGenres(genres);
+    const cleanedGenres = extractNamesFromGenresList(genres);
     const { full_poster_path, full_backdrop_path } = formatImageURLs(movie);
 
     return {
