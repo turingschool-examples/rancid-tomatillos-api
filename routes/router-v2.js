@@ -128,6 +128,17 @@ routerV2.get('/movies/:movie_id', checkIfMovieExists('params'), (request, respon
     .catch(error => response.status(500).json({ error }));
 });
 
+// GET videos for a particular movie
+routerV2.get('/movies/:movie_id/videos', checkIfMovieExists('params'), (request, response) => {
+  const { movie_id } = request.params;
+
+  databaseV2('movies_videos').where({movie_id: movie_id})
+    .then(videos => {
+      return response.status(200).json({ videos });
+    })
+    .catch(error => response.status(500).json({ error }));
+});
+
 // GET all ratings for a user
 routerV2.get('/users/:user_id/ratings', checkIfUserExistsFromParam, (request, response) => {
   const { user_id } = request.params;
