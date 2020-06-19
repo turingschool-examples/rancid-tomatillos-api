@@ -5,8 +5,6 @@ const request = require('supertest');
 beforeEach(async () => {
   // Reset seed db with primary keys reset
   await databaseV1.migrate.rollback();
-  await databaseV1.migrate.rollback();
-  await databaseV1.migrate.rollback();
   await databaseV1.migrate.latest();
   await databaseV1.seed.run();
 })
