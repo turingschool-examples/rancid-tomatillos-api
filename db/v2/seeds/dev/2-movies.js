@@ -8,37 +8,28 @@ const fetchIndividualMovieDetails = movies => {
     return fetch(`https://api.themoviedb.org/3/movie/${movie.id}?api_key=${process.env.MOVIE_DB_APIKEY}&language=en-US`)
       .then(response => response.json())
       .then(movieDetails => {
-        const { budget, revenue, runtime, tagline } = movieDetails;
-        return {...movie, budget, revenue, runtime, tagline };
-      })
+        return { ...movie, ...movieDetails };
+      });
   });
 
   return Promise.all(moviePromises);
 }
 
-const fetchMoviesAndSupportingData = () => {
+const fetchMovies = () => {
   const pages = [1, 2];
   // flattened array of movies
-  const moviesPromise = Promise.all(pages.map(pageNum => {
+  return Promise.all(pages.map(pageNum => {
     return fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_DB_APIKEY}&language=en-US&page=${pageNum}`)
       .then(response => response.json())
       .then(movieData => movieData.results)
   }))
   .then(moviePages => [].concat.apply([], moviePages))
   .then(movies => fetchIndividualMovieDetails(movies));
-
-  // array of genres and associated ids
-  const genresPromise = fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${process.env.MOVIE_DB_APIKEY}&language=en-US`)
-    .then(response => response.json())
-    .then(genreData => genreData.genres);
-
-  return Promise.all([moviesPromise, genresPromise]);
 };
 
-const replaceGenreIdsWithGenreName = (movieGenreIds, genreIdsAndNames) => {
-  return movieGenreIds.map(movieGenreId => {
-    const matchingGenre = genreIdsAndNames.find(genreIdAndName => genreIdAndName.id === movieGenreId);
-    return matchingGenre.name;
+const cleanGenres = genreIdsAndNames => {
+  return genreIdsAndNames.map(genreIdAndName => {
+    return genreIdAndName.name;
   });
 };
 
@@ -53,13 +44,12 @@ const formatImageURLs = movie => {
   return { full_poster_path, full_backdrop_path }
 };
 
-const buildMovieData = moviesAndSupportingData => {
-  const [movies, genreIdsAndNames] = moviesAndSupportingData;
+const buildMovieData = movies => {
 
   return movies.map(movie => {
-    const { id, title, overview, release_date, genre_ids, budget, revenue, runtime, tagline } = movie;
+    const { id, title, overview, release_date, genres, budget, revenue, runtime, tagline } = movie;
 
-    const genres = replaceGenreIdsWithGenreName(genre_ids, genreIdsAndNames);
+    const cleanedGenres = cleanGenres(genres);
     const { full_poster_path, full_backdrop_path } = formatImageURLs(movie);
 
     return {
@@ -69,7 +59,7 @@ const buildMovieData = moviesAndSupportingData => {
       title,
       overview,
       release_date,
-      genres: JSON.stringify(genres),
+      genres: JSON.stringify(cleanedGenres),
       budget,
       revenue,
       runtime,
@@ -79,8 +69,8 @@ const buildMovieData = moviesAndSupportingData => {
 };
 
 exports.seed = (knex) => {
-  return fetchMoviesAndSupportingData()
-    .then(moviesAndSupportingData => buildMovieData(moviesAndSupportingData))
+  return fetchMovies()
+    .then(movies => buildMovieData(movies))
     .then(cleanedMovies => {
       return knex('movies').insert(cleanedMovies);
     })
