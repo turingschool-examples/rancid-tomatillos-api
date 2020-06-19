@@ -95,7 +95,21 @@ routerV2.get('/movies', (request, response) => {
       Promise.all(movies.map(movie => {
         return calculateAverageRatingForMovie(movie);
       }))
-      .then(movies => response.status(200).json({ movies }))
+      .then(movies => {
+        const strippedDetailsMovies = movies.map(movie => {
+          const {id, poster_path, backdrop_path, title, average_rating, release_date} = movie;
+
+          return {
+            id,
+            poster_path,
+            backdrop_path,
+            title,
+            average_rating,
+            release_date
+          }
+        });
+        return response.status(200).json({ movies: strippedDetailsMovies })
+      })
     })
     .catch(error => response.status(500).json({ error }));
 });

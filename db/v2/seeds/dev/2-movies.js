@@ -1,24 +1,38 @@
 
-// Movies from https://developers.themoviedb.org/3/movies/get-now-playing (1st page)
+// Movies from https://developers.themoviedb.org/3/movies/get-now-playing (it is paginated)
 const fetch = require('node-fetch');
 require('dotenv').config();
+
+const fetchIndividualMovieDetails = movies => {
+  const moviePromises = movies.map(movie => {
+    return fetch(`https://api.themoviedb.org/3/movie/${movie.id}?api_key=${process.env.MOVIE_DB_APIKEY}&language=en-US`)
+      .then(response => response.json())
+      .then(movieDetails => {
+        const { budget, revenue, runtime, tagline } = movieDetails;
+        return {...movie, budget, revenue, runtime, tagline };
+      })
+  });
+
+  return Promise.all(moviePromises);
+}
 
 const fetchMoviesAndSupportingData = () => {
   const pages = [1, 2];
   // flattened array of movies
-  const moviePagesPromise = Promise.all(pages.map(pageNum => {
+  const moviesPromise = Promise.all(pages.map(pageNum => {
     return fetch(`https://api.themoviedb.org/3/movie/now_playing?api_key=${process.env.MOVIE_DB_APIKEY}&language=en-US&page=${pageNum}`)
       .then(response => response.json())
       .then(movieData => movieData.results)
   }))
-  .then(moviePages => [].concat.apply([], moviePages));
+  .then(moviePages => [].concat.apply([], moviePages))
+  .then(movies => fetchIndividualMovieDetails(movies));
 
   // array of genres and associated ids
   const genresPromise = fetch(`https://api.themoviedb.org/3/genre/movie/list?api_key=${process.env.MOVIE_DB_APIKEY}&language=en-US`)
     .then(response => response.json())
     .then(genreData => genreData.genres);
 
-  return Promise.all([moviePagesPromise, genresPromise]);
+  return Promise.all([moviesPromise, genresPromise]);
 };
 
 const replaceGenreIdsWithGenreName = (movieGenreIds, genreIdsAndNames) => {
@@ -43,7 +57,7 @@ const buildMovieData = moviesAndSupportingData => {
   const [movies, genreIdsAndNames] = moviesAndSupportingData;
 
   return movies.map(movie => {
-    const { id, title, overview, release_date, genre_ids } = movie;
+    const { id, title, overview, release_date, genre_ids, budget, revenue, runtime, tagline } = movie;
 
     const genres = replaceGenreIdsWithGenreName(genre_ids, genreIdsAndNames);
     const { full_poster_path, full_backdrop_path } = formatImageURLs(movie);
@@ -55,7 +69,11 @@ const buildMovieData = moviesAndSupportingData => {
       title,
       overview,
       release_date,
-      genres: JSON.stringify(genres)
+      genres: JSON.stringify(genres),
+      budget,
+      revenue,
+      runtime,
+      tagline
     };
   });
 };
