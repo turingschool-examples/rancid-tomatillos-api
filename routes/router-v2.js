@@ -59,7 +59,7 @@ const calculateAverageRatingForMovie = movie => {
 };
 
 // Middleware to run probability function, and if it triggers, then send a non-200-level response
-const sendErrorReponseRandomly = (chance) => {
+const sendErrorResponseRandomly = (chance) => {
   return function(request, response, next) {
     // a 1-in-"this value" chance of happening, if "chance" is 200, it's about a 1-in-200 chance
     const randomInteger = Math.floor(Math.random() * chance) + 1;
@@ -115,7 +115,7 @@ routerV2.get('/movies', (request, response) => {
 });
 
 // GET a particular movie with it's average rating
-routerV2.get('/movies/:movie_id', checkIfMovieExists('params'), (request, response) => {
+routerV2.get('/movies/:movie_id', checkIfMovieExists('params'), sendErrorResponseRandomly(500), (request, response) => {
   const { movie_id } = request.params;
 
   databaseV2('movies').where({id: movie_id})
@@ -143,13 +143,14 @@ routerV2.get('/movies/:movie_id/videos', checkIfMovieExists('params'), (request,
 routerV2.get('/users/:user_id/ratings', checkIfUserExistsFromParam, (request, response) => {
   const { user_id } = request.params;
 
+
   databaseV2('usersReviews').where({ user_id })
     .then(ratings => response.status(200).json({ ratings }))
     .catch(error => response.status(500).json({ error }));
 });
 
 // POST new rating for a user
-routerV2.post('/users/:user_id/ratings', checkIfUserExistsFromParam, verifyBodyProperties(['movie_id', 'rating']), checkIfMovieExists('body'), (request, response) => {
+routerV2.post('/users/:user_id/ratings', checkIfUserExistsFromParam, verifyBodyProperties(['movie_id', 'rating']), checkIfMovieExists('body'), sendErrorResponseRandomly(400), (request, response, next) => {
   const { user_id } = request.params;
   const { movie_id, rating } = request.body;
 
