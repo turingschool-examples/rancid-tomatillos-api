@@ -10,6 +10,7 @@ exports.seed = (knex) => {
     {name: 'Diana', email: 'diana@turing.io', password: '111111'},
     {name: 'Rick', email: 'rick@turing.io', password: 'asdf123'},
     {name: 'Marge', email: 'marge@turing.io', password: 'password123'},
-    {name: 'Tinsel', email:'tinsel@turing.io', password: 'zxcvb'}
+    {name: 'Tinsel', email:'tinsel@turing.io', password: 'zxcvb'},
+    {name: 'Claire', email: 'claire@turing.io', password: 'qwer1234'}
   ]);
 };
