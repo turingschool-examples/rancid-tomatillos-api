@@ -1275,7 +1275,11 @@ const findMovie = (id) => {
   // replace genre IDs with genre strings
   movie.genre_ids = movie.genre_ids.map(genre_id => {
     let match = genres.find(genre => genre.id === genre_id)
-    return match.name;
+    if (match) {
+      return match.name;
+    } else {
+      return genre_id;
+    }
   })
 
   return movie;
