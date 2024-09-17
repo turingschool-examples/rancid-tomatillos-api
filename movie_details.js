@@ -1269,8 +1269,12 @@ const genres = [
   }
 ];
 
-const findMovie = (id) => {
+const findMovieDetails = (id) => {
   let movie = movieDetails.find(movie => movie.id == id);
+
+  if (!movie) {
+    return false;
+  }
 
   // replace genre IDs with genre strings
   movie.genre_ids = movie.genre_ids.map(genre_id => {
@@ -1285,4 +1289,4 @@ const findMovie = (id) => {
   return movie;
 }
 
-module.exports = { findMovie }
+module.exports = { findMovieDetails }

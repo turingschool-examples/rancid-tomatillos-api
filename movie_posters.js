@@ -333,5 +333,15 @@ const posters = [
 
 posters.sort((a, b) => a.title.localeCompare(b.title));
 
+const findMoviePoster = (id) => {
+  let movie = posters.find(movie => movie.id == id);
+
+  if (!movie) {
+    return false;
+  }
+
+  return movie;
+}
+
   
-module.exports = { posters }
+module.exports = { posters, findMoviePoster }

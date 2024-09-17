@@ -1,5 +1,5 @@
-const { posters } = require('./movie_posters');
-const { findMovie } = require('./movie_details');
+const { posters, findMoviePoster } = require('./movie_posters');
+const { findMovieDetails } = require('./movie_details');
 
 const express = require('express');
 const app = express();
@@ -15,42 +15,38 @@ app.get('/api/v1/movies', (request, response) => {
 });
 
 // PATCH - UPVOTE A MOVIE
-app.patch('/api/v1/movies', (request, response) => {
-  const movieToUpdate = request.body;
+app.patch('/api/v1/movies/:id', (request, response) => {
+  const { id } = request.params;
+  const movie = findMoviePoster(id);
 
-  for (let requiredParameter of ['id']) {
-    if (!movieToUpdate[requiredParameter]) {
-      response
-        .status(422)
-        .send({ error: `Expected format: { id: <String> }. You're missing the "${requiredParameter}" property.` });
-      return
-    }
-  }
-
-  const { id } = movieToUpdate;
-  let vote_count;
-  let foundMatch = false;
-
-  posters.forEach(movie => {
-    if (movie.id == id) {
-      movie.vote_count++;
-      vote_count = movie.vote_count;
-      foundMatch = true;
-    }
-  })
-
-  if (!foundMatch) {
+  if (!movie) {
     response.status(404).send({ error: `No movie found with an ID of ${id}. Try again with an existing movie ID.` });
     return;
   }
 
-  response.status(200).send(posters);
+  const body = request.body;
+
+  if (body.vote_direction === 'up') {
+    movie.vote_count++;
+  } else if (body.vote_direction === 'down') {
+    movie.vote_count--;
+  } else {
+    response.status(400).send({ error: `Expected body: { vote_direction: 'up' or 'down' }` });
+    return;
+  }
+
+  response.status(200).json(movie);
 });
 
 // GET - MOVIE DETAILS
 app.get('/api/v1/movies/:id', (request, response) => {
   const { id } = request.params;
-  const movie = findMovie(id)
+  const movie = findMovieDetails(id);
+
+  if (!movie) {
+    response.status(404).send({ error: `No movie found with an ID of ${id}. Try again with an existing movie ID.` });
+    return;
+  }
 
   response.status(200).json(movie);
 });
